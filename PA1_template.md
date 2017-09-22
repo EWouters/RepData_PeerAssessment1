@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 activity.df <- read.csv(unz("activity.zip", "activity.csv"))
 activity.df$date <- as.POSIXct(strptime(activity.df$date, "%Y-%m-%d"))
 ```
@@ -15,7 +11,8 @@ activity.df$date <- as.POSIXct(strptime(activity.df$date, "%Y-%m-%d"))
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 stepsbydays <- aggregate(activity.df$steps, by = list(activity.df$date), sum, na.rm = T)
 names(stepsbydays) <- c("date", "steps")
 totalmeansteps <- mean(stepsbydays$steps)
@@ -27,11 +24,14 @@ abline(v = totalmeansteps, col = "red")
 abline(v = totalmediansteps, col = "blue")
 legend("topright", legend = c("mean", "median"), col = c("red", "blue"), lty = 1)
 ```
-The mean of the total number of steps per day is `r round(totalmeansteps,2)`. The median of the total number of steps per day is `r totalmediansteps`.
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+The mean of the total number of steps per day is 9354.23. The median of the total number of steps per day is 10395.
 
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 stepsbyintervals <- aggregate(activity.df$steps, by = list(activity.df$interval), mean, na.rm = T)
 names(stepsbyintervals) <- c("interval", "steps")
 maxinterval <- stepsbyintervals$interval[which.max(stepsbyintervals$steps)]
@@ -41,11 +41,14 @@ plot(stepsbyintervals$interval, stepsbyintervals$steps, type = "l",
 abline(v = maxinterval, col = "red")
 legend("topright", legend = "max", col = "red", lty = 1)
 ```
-The interval with the highest number of steps per 5-minute interval on average across all the days is `r maxinterval`.
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+The interval with the highest number of steps per 5-minute interval on average across all the days is 835.
 
 
 ## Imputing missing values
-```{r}
+
+```r
 numberofNA <- sum(is.na(activity.df$steps))
 activity.df.imputed <- merge(activity.df, stepsbyintervals, by = "interval")
 activity.df.imputed <- within(activity.df.imputed,
@@ -66,12 +69,15 @@ abline(v = totalmeansteps.imputed, col = "red")
 abline(v = totalmediansteps.imputed, col = "blue")
 legend("topright", legend = c("mean", "median"), col = c("red", "blue"), lty = 1)
 ```
-The number of missing values in the dataset is `r numberofNA`. 
-After imputing the missing values the mean of the total number of steps per day is `r toString(round(totalmeansteps.imputed,2))`. The median of the imputed total number of steps per day is `r toString(round(totalmediansteps.imputed,2))`. The difference between the mean and the imputed mean is `r round(totalmeansteps - totalmeansteps.imputed,2)`. The difference between the mean and the imputed mean is `r round(totalmediansteps - totalmediansteps.imputed,2)`. After imputing the missing values with the mean the median has become the mean. Also both the mean and the meadian have shrunk.
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+The number of missing values in the dataset is 2304. 
+After imputing the missing values the mean of the total number of steps per day is 10766.19. The median of the imputed total number of steps per day is 10766.19. The difference between the mean and the imputed mean is -1411.96. The difference between the mean and the imputed mean is -371.19. After imputing the missing values with the mean the median has become the mean. Also both the mean and the meadian have shrunk.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 activity.df.imputed$weekday  <- as.factor(ifelse(weekdays(activity.df.imputed$date, F) %in% c("Saturday","Sunday"), "weekend", "weekday")) 
 
 stepsbyintervals.weekend <- aggregate(list(steps = activity.df.imputed$steps),
@@ -82,6 +88,6 @@ qplot(x = interval, y = steps, facets = weekday ~ .,
       data = stepsbyintervals.weekend, geom = "path",
       main = "Average daily activity pattern",
       xlab = "Interval", ylab = "Number of steps")
-
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
